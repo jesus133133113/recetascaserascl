@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌿 Recetas Naturales STP</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --color-bg: #fff9f5;
+      --color-text: #333;
+      --color-portada-grad: linear-gradient(to bottom, #ffe6cc, #fff);
+      --color-bienvenida: #fffae6;
+      --color-bienvenida-text: #333;
+      --color-receta-bg: #fdfdfd;
+      --color-nota-medidas: #f2efe8;
+      --color-footer: #888;
+      --color-shadow: 0 0 10px rgba(0,0,0,0.15);
+      --color-accent: #ffbe88;
+      --color-button: #dff;
+      --color-button-hover: #bbefff;
+      --color-favorito: #e74c3c;
+      --color-toast: #232323;
+      --color-toast-text: #fff;
+      --color-modal-bg: rgba(0,0,0,0.55);
+      --color-advertencia-bg: #fff4d4;
+      --color-advertencia-border: #f9d8a3;
+      --color-advertencia-text: #8b6b10;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 18px;
+      transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+    }
+    body.modo-oscuro {
+      --color-bg: #1f1f1f;
+      --color-text: #fafafa;
+      --color-receta-bg: #232323;
+      --color-nota-medidas: #232323;
+      --color-bienvenida: #232323;
+      --color-bienvenida-text: #ffbe88;
+      --color-footer: #bbb;
+      --color-portada-grad: linear-gradient(to bottom, #232323, #222);
+      --color-button: #23232e;
+      --color-button-hover: #3a3a4a;
+      --color-toast: #ffbe88;
+      --color-toast-text: #232323;
+      --color-advertencia-bg: #383120;
+      --color-advertencia-border: #8b6b10;
+      --color-advertencia-text: #ffbe88;
+    }
+    /* Portada */
+    .portada {
+      min-height: 100vh;
+      background: var(--color-portada-grad);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .img-portada {
+      max-width: 300px;
+      width: 80vw;
+      border-radius: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .portada h1 {
+      font-size: 3em;
+      color: #c65353;
+      text-shadow: 1px 1px #fff;
+      margin: 0.5em 0;
+    }
+    .portada p {
+      font-size: 1.2em;
+      color: var(--color-bienvenida-text);
+    }
+    .portada button {
+      margin-top: 25px;
+      padding: 14px 28px;
+      font-size: 1.2em;
+      background: #fda;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s;
+    }
+    .portada button:hover, .controles-superiores button:hover {
+      background: #ffd8b3;
+    }
+    .creado-por {
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #888;
+    }
+    /* Barra superior */
+    .barra-superior {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff6ed;
+      padding: 8px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    body.modo-oscuro .barra-superior {
+      background: #232323;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+    }
+    .titulo-principal {
+      font-size: 1.5em;
+      margin: 0;
+      color: var(--color-text);
+    }
+    .botones-opciones button, .controles-superiores button {
+      font-size: 1.2em;
+      padding: 8px 16px;
+      margin: 0 2px;
+      border: none;
+      border-radius: 10px;
+      background: #ffd4c4;
+      color: #222;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    .botones-opciones button:focus, .controles-superiores button:focus, .botones-recetas button:focus {
+      outline: 2px solid var(--color-accent);
+    }
+    body.modo-oscuro .botones-opciones button, body.modo-oscuro .controles-superiores button {
+      background: var(--color-button);
+      color: var(--color-accent);
+    }
+    body.modo-oscuro .botones-opciones button:hover, body.modo-oscuro .controles-superiores button:hover {
+      background: var(--color-button-hover);
+    }
+    /* Controles */
+    .controles-superiores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 18px 0 6px 0;
+      padding: 0 10px;
+    }
+    .controles-superiores select, .controles-superiores input[type="search"] {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      font-size: 1em;
+      flex-grow: 1;
+    }
+    /* Botones de recetas */
+    .botones-recetas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 24px 0;
+      padding: 0 10px;
+    }
+    .botones-recetas button {
+      font-size: 1.1em;
+      padding: 12px 18px;
+      margin: 2px;
+      border: none;
+      background: var(--color-button);
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #222;
+      transition: background 0.3s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.11);
+      position: relative;
+    }
+    .botones-recetas button[data-favorito="true"]::after {
+      content: "★";
+      color: var(--color-favorito);
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      font-size: 1.2em;
+    }
+    .botones-recetas button:hover {
+      background: var(--color-button-hover);
+    }
+    body.modo-oscuro .botones-recetas button,
+    body.modo-oscuro .botones-recetas button:hover {
+      color: var(--color-accent);
+    }
+    /* Contenedor de receta */
+    .contenedor-receta-activa {
+      max-width: 700px;
+      margin: 0 auto 40px auto;
+      padding: 10px;
+      min-height: 380px;
+      width: 100vw;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+    }
+    .receta {
+      width: 98%;
+      max-width: 520px;
+      margin: 0 auto;
+      border-radius: 18px;
+      box-shadow: var(--color-shadow);
+      background-color: var(--color-receta-bg);
+      animation: aparecer 0.65s ease;
+      font-size: 1em;
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 390px;
+      min-width: 0;
+    }
+    .receta.mostrar {
+      display: flex;
+    }
+    .img-receta {
+      display: block;
+      max-width: 220px;
+      width: 80vw;
+      height: auto;
+      margin: 22px auto 14px auto;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+    }
+    .contenido-receta {
+      border-radius: 16px;
+      padding: 18px 22px 20px 22px;
+      background: inherit;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .contenido-receta h2 {
+      font-size: 2em;
+      margin-bottom: 8px;
+      color: var(--color-accent);
+      text-align: center;
+    }
+    .contenido-receta h3 {
+      margin-top: 14px;
+      color: var(--color-accent);
+      font-size: 1.2em;
+    }
+    .contenido-receta ul,
+    .contenido-receta ol {
+      margin-left: 20px;
+      font-size: 1.05em;
+      color: var(--color-text);
+    }
+    body.modo-oscuro .contenido-receta ul,
+    body.modo-oscuro .contenido-receta ol {
+      color: #fff;
+    }
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    /* Advertencia */
+    .receta .advertencia {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: var(--color-advertencia-bg);
+      border: 1px solid var(--color-advertencia-border);
+      border-radius: 10px;
+      color: var(--color-advertencia-text);
+      font-size: 0.9em;
+    }
+    /* Acciones */
+    .acciones-receta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px auto;
+      max-width: 700px;
+      padding: 0 10px;
+    }
+    .acciones-receta button {
+      font-size: 1em;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: none;
+      background: #ffd4c4;
+      color: #222;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .acciones-receta button:hover {
+      background: #ffae91;
+    }
+    #favoritoBtn[data-favorito="true"] {
+      color: var(--color-favorito);
+    }
+    body.modo-oscuro .acciones-receta button {
+      background: var(--color-button);
+      color: var(--color-accent);
+    }
+    body.modo-oscuro .acciones-receta button:hover {
+      background: var(--color-button-hover);
+    }
+    /* Otros */
+    .nota-medidas {
+      margin: 1.5rem auto 0 auto;
+      background: var(--color-nota-medidas);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.98rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      max-width: 420px;
+      color: var(--color-text);
+    }
+    body.modo-oscuro .nota-medidas {
+      color: #ffbe88;
+    }
+    footer, .legal {
+      text-align: center;
+      margin: 34px 0 16px;
+      font-size: 1em;
+      color: var(--color-footer);
+    }
+    .bienvenida {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-bienvenida);
+      color: var(--color-bienvenida-text);
+      padding: 12px 28px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      font-weight: bold;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s, color 0.3s, background 0.3s;
+    }
+    .bienvenida.mostrar {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 40px;
+      transform: translateX(-50%);
+      background: var(--color-toast);
+      color: var(--color-toast-text);
+      padding: 16px 28px;
+      border-radius: 12px;
+      box-shadow: 0 0 14px rgba(0,0,0,0.13);
+      z-index: 1100;
+      opacity: 0;
+      font-size: 1.05em;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .toast.mostrar {
+      opacity: 1;
+      pointer-events: all;
+    }
+    /* Modales */
+    .modal {
+      position: fixed;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: var(--color-modal-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .modal-contenido {
+      background: var(--color-receta-bg);
+      color: var(--color-text);
+      padding: 28px 20px 18px 20px;
+      border-radius: 18px;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.27);
+      width: 95%;
+      max-width: 500px;
+      max-height: 95vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .modal-cerrar {
+      position: absolute;
+      right: 8px; top: 8px;
+      background: transparent;
+      border: none;
+      font-size: 1.3em;
+      cursor: pointer;
+      color: var(--color-text);
+    }
+    .modal input, .modal textarea {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 1em;
+      width: 100%;
+    }
+    .modal textarea {
+      resize: vertical;
+      min-height: 40px;
+    }
+    .testimonios {
+      max-width: 700px;
+      margin: 18px auto 0 auto;
+      background: var(--color-receta-bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      padding: 16px 20px;
+      width: 98%;
+      box-sizing: border-box;
+    }
+    .testimonios ul {
+      list-style: none;
+      padding: 0;
+    }
+    .testimonios li {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    .testimonios li:last-child {
+      border-bottom: none;
+    }
+    .testimonios strong {
+      color: var(--color-accent);
+    }
+    .testimonios h2 {
+      margin-top: 0;
+    }
+    .oculto { display: none !important; }
+    @media (max-width: 700px) {
+      body { font-size: 16px; }
+      .portada h1 { font-size: 2em; }
+      .portada p { font-size: 1em; }
+      .titulo-principal { font-size: 1.2em; }
+      .botones-opciones button, .controles-superiores button { font-size: 1em; padding: 6px 10px; }
+      .controles-superiores { flex-direction: column; align-items: stretch; }
+      .controles-superiores select, .controles-superiores input[type="search"] { width: 100%; }
+      .botones-recetas button { font-size: 1em; padding: 10px 14px; }
+      .receta { min-height: auto; }
+      .img-receta { max-width: 180px; }
+      .contenido-receta { padding: 16px; }
+      .contenido-receta h2 { font-size: 1.5em; }
+      .contenido-receta h3 { font-size: 1.1em; }
+      .acciones-receta { flex-direction: column; align-items: center; }
+      .acciones-receta button { width: 90%; }
+      .nota-medidas { font-size: 0.9em; padding: 8px; }
+      .modal-contenido { padding: 16px; width: 95%; max-height: 90vh; }
+    }
+  </style>
+</head>
+<body>
+  <section id="portada" class="portada" aria-label="Portada principal">
+    <img src="img/portada.jpg" alt="Belleza natural - portada" class="img-portada" loading="lazy">
+    <h1>🌿 <span id="bienvenidaTitulo">Bienvenido a Recetas Naturales STP</span> 🌿</h1>
+    <p id="bienvenidaSub">💚 Elige tu tipo de piel y descubre recetas caseras perfectas para ti 💚</p>
+    <button id="entrarBtn" aria-label="Entrar a la aplicación">Entrar a la App</button>
+    <footer class="creado-por">Creado por: <strong>STP J, L, R</strong> ✨</footer>
+  </section>
+
+  <header class="barra-superior oculto" id="barraSuperior" role="banner">
+    <h1 class="titulo-principal" id="tituloPrincipal">🌿 Belleza Casera 🌸</h1>
+    <div class="botones-opciones" role="toolbar" aria-label="Opciones de la app">
+      <button title="Cambiar tema" id="modoBtn" aria-label="Cambiar tema">🌙</button>
+      <button title="Música" id="musicaBtn" aria-label="Activar o pausar música">🎵</button>
+      <button title="Cambiar idioma" id="idiomaBtn" aria-label="Cambiar idioma">🇪🇸/🇬🇧</button>
+    </div>
+  </header>
+
+  <div id="buscadorInteligente" class="buscador-inteligente oculto">
+    <input type="search" id="inputBuscadorInteligente" placeholder="¿Qué necesitas? Ej: acné, brillo cabello, piel seca..." autocomplete="off">
+    <button id="btnBuscarInteligente" aria-label="Buscar remedio">🔍</button>
+    <div id="resultadosBuscador"></div>
+  </div>
+
+  <section class="controles-superiores oculto" id="controlesSuperiores" aria-label="Filtrado y búsqueda">
+    <select id="filtroPiel" aria-label="Filtrar recetas por tipo de piel">
+      <option value="todas">Todas las pieles/zona</option>
+      <option value="grasa">Grasa</option>
+      <option value="seca">Seca</option>
+      <option value="mixta">Mixta</option>
+      <option value="sensible">Sensible</option>
+      <option value="labios">Labios</option>
+      <option value="cabello">Cabello</option>
+    </select>
+    <input type="search" id="busquedaReceta" placeholder="Buscar receta..." aria-label="Buscar receta por nombre o ingrediente" autocomplete="off">
+    <button id="añadirRecetaBtn" aria-label="Añadir receta personalizada">➕ Añadir receta</button>
+    <button id="añadirTestimonioBtn" aria-label="Añadir testimonio">💬 Testimonio</button>
+  </section>
+
+  <nav class="botones-recetas oculto" id="botonesRecetas" aria-label="Navegación de recetas" role="navigation">
+    </nav>
+
+  <main id="contenedorRecetaActiva" class="contenedor-receta-activa oculto" aria-live="polite" aria-label="Recetas" tabindex="0"></main>
+
+  <div class="acciones-receta oculto" id="accionesReceta" role="group" aria-label="Descargar, compartir o marcar favorito">
+    <button id="descargarTxtBtn" aria-label="Descargar receta como texto">⬇️ TXT</button>
+    <button id="descargarPdfBtn" aria-label="Descargar receta como PDF">📄 PDF</button>
+    <button id="compartirBtn" aria-label="Compartir receta">🔗 Compartir</button>
+    <button id="favoritoBtn" aria-label="Agregar o quitar receta de favoritos">🤍 Favorito</button>
+  </div>
+
+  <div class="nota-medidas oculto" id="notaMedidas" aria-label="Medidas caseras">
+    📝 <strong>Medidas caseras:</strong><br>
+    • 1 cucharada = 15 ml<br>
+    • 1 cucharadita = 5 ml<br>
+    • 1 taza = 240 ml<br>
+    • 1/2 taza = 120 ml<br>
+    • 1/4 taza = 60 ml<br>
+    • 1 pizca = menos de 1/8 cucharadita
+  </div>
+
+  <p class="legal oculto" id="pieLegal">
+    ⚠️ Estas recetas son naturales y caseras. Consulta a un especialista si tienes dudas.
+  </p>
+  
+  <div id="modalPersonalizada" class="modal oculto" role="dialog" aria-modal="true" aria-labelledby="modalPersonalizadaTitulo">
+    <div class="modal-contenido">
+      <button class="modal-cerrar" id="cerrarPersonalizadaBtn" aria-label="Cerrar ventana">✖️</button>
+      <h2 id="modalPersonalizadaTitulo">➕ Nueva Receta Personalizada</h2>
+      <input id="nuevaTitulo" placeholder="Título" required aria-label="Título de la receta">
+      <input id="nuevaTipo" placeholder="Tipo de piel o zona (ej: grasa, seca, labios...)" required aria-label="Tipo de piel o zona">
+      <input id="nuevaImg" placeholder="URL de imagen (opcional)" aria-label="URL de imagen">
+      <textarea id="nuevaIngredientes" placeholder="Ingredientes (separados por coma)" required aria-label="Ingredientes"></textarea>
+      <textarea id="nuevaPreparacion" placeholder="Preparación (separado por punto y coma)" required aria-label="Preparación"></textarea>
+      <textarea id="nuevaConsejos" placeholder="Consejos (separados por punto y coma)" aria-label="Consejos"></textarea>
+      <button id="guardarPersonalizadaBtn" aria-label="Guardar receta personalizada">Guardar</button>
+    </div>
+  </div>
+
+  <div id="modalTestimonio" class="modal oculto" role="dialog" aria-modal="true" aria-labelledby="modalTestimonioTitulo">
+    <div class="modal-contenido">
+      <button class="modal-cerrar" id="cerrarTestimonioBtn" aria-label="Cerrar ventana">✖️</button>
+      <h2 id="modalTestimonioTitulo">💬 Nuevo Testimonio</h2>
+      <input id="nombreTestimonio" placeholder="Tu nombre (opcional)" aria-label="Nombre">
+      <textarea id="textoTestimonio" placeholder="¡Cuéntanos tu experiencia!" required aria-label="Texto de testimonio"></textarea>
+      <button id="guardarTestimonioBtn" aria-label="Guardar testimonio">Guardar</button>
+    </div>
+  </div>
+
+  <div id="testimonios" class="testimonios oculto" aria-label="Testimonios de usuarios">
+    <h2>💬 Testimonios</h2>
+    <ul id="listaTestimonios"></ul>
+  </div>
+
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <audio id="musicaFondo" loop>
+    <source src="audio/suave.mp3" type="audio/mpeg" />
+  </audio>
+  <script>
+    // Recetas Naturales STP - JS Mejorado para concurso
+    // Autor: STP J, L, R
+
+    const recetasBase = {
+      cicatricure: {
+        id: "cicatricure",
+        titulo: { es: "🧴 Cicatricure Casero", en: "🧴 Homemade Cicatricure" },
+        tipo: "grasa",
+        img: "img/cicatricure.jpg",
+        ingredientes: {
+          es: ["Gel de aloe vera", "Aceite de coco", "Miel pura"],
+          en: ["Aloe vera gel", "Coconut oil", "Pure honey"]
+        },
+        preparacion: {
+          es: ["Mezcla 2 cucharadas de aloe con 1 de aceite de coco.", "Agrega 1 cucharadita de miel."],
+          en: ["Mix 2 tablespoons of aloe with 1 of coconut oil.", "Add 1 teaspoon of honey."]
+        },
+        consejos: {
+          es: ["Aplicar en la noche sobre cicatrices limpias.", "Dejar actuar por 30 minutos y enjuagar.", "Usar 3 veces por semana."],
+          en: ["Apply at night on clean scars.", "Leave on for 30 minutes and rinse.", "Use 3 times a week."]
+        },
+        advertencia: {
+          es: "⚠️ No usar si eres alérgico al coco. Evitar aplicar sobre piel irritada.",
+          en: "⚠️ Do not use if you are allergic to coconut. Avoid applying on irritated skin."
+        },
+        color: "#f4dada"
+      },
+      antiestrias: {
+        id: "antiestrias",
+        titulo: { es: "💪 Antiestrías Natural", en: "💪 Natural Anti-stretch marks" },
+        tipo: "seca",
+        img: "img/antiestrias.jpg",
+        ingredientes: {
+          es: ["Puré de plátano", "Aceite de oliva", "Avena molida"],
+          en: ["Mashed banana", "Olive oil", "Ground oats"]
+        },
+        preparacion: {
+          es: ["Tritura 1 plátano maduro.", "Agrega 1 cda de aceite y 1 cda de avena."],
+          en: ["Mash 1 ripe banana.", "Add 1 tbsp of oil and 1 tbsp of oats."]
+        },
+        consejos: {
+          es: ["Aplica en zonas con estrías con masajes circulares.", "Déjalo 20 minutos y retira con agua tibia."],
+          en: ["Apply on areas with stretch marks using circular massages.", "Leave for 20 minutes and remove with warm water."]
+        },
+        advertencia: {
+          es: "⚠️ Realiza una prueba en una pequeña área de la piel para evitar reacciones adversas.",
+          en: "⚠️ Perform a patch test on a small skin area to avoid adverse reactions."
+        },
+        color: "#ffe4b3"
+      },
+      hidratante: {
+        id: "hidratante",
+        titulo: { es: "💧 Hidratante de Pepino", en: "💧 Cucumber Moisturizer" },
+        tipo: "mixta",
+        img: "img/hidratante.jpg",
+        ingredientes: {
+          es: ["Medio pepino", "Yogur natural", "Miel cruda"],
+          en: ["Half cucumber", "Plain yogurt", "Raw honey"]
+        },
+        preparacion: {
+          es: ["Licúa el pepino pelado.", "Mezcla con 2 cdas de yogur y 1 cdita de miel."],
+          en: ["Blend the peeled cucumber.", "Mix with 2 tbsp of yogurt and 1 tsp of honey."]
+        },
+        consejos: {
+          es: ["Ideal para hidratar por la mañana.", "Aplicar 15 minutos y enjuagar con agua fría."],
+          en: ["Ideal for morning hydration.", "Apply for 15 minutes and rinse with cold water."]
+        },
+        advertencia: {
+          es: "⚠️ El pepino y la miel pueden causar leve irritación en piel muy sensible.",
+          en: "⚠️ Cucumber and honey may cause slight irritation on very sensitive skin."
+        },
+        color: "#ccf2e7"
+      },
+      exfoliante: {
+        id: "exfoliante",
+        titulo: { es: "🌾 Exfoliante de Azúcar", en: "🌾 Sugar Scrub" },
+        tipo: "sensible",
+        img: "img/exfoliante.jpg",
+        ingredientes: {
+          es: ["Azúcar morena", "Aceite de coco", "Limón"],
+          en: ["Brown sugar", "Coconut oil", "Lemon"]
+        },
+        preparacion: {
+          es: ["Mezcla 2 cdas de azúcar con 1 cda de aceite.", "Agrega unas gotas de limón (opcional)."],
+          en: ["Mix 2 tbsp of sugar with 1 tbsp of oil.", "Add a few drops of lemon (optional)."]
+        },
+        consejos: {
+          es: ["Masajear suavemente una vez por semana.", "Evitar el sol si usas limón."],
+          en: ["Massage gently once a week.", "Avoid sun exposure if you use lemon."]
+        },
+        advertencia: {
+          es: "⚠️ El limón puede aumentar la sensibilidad al sol. Usar solo de noche y con precaución.",
+          en: "⚠️ Lemon can increase sun sensitivity. Use only at night and with caution."
+        },
+        color: "#ffe9c6"
+      },
+      labios: {
+        id: "labios",
+        titulo: { es: "💋 Bálsamo para Labios", en: "💋 Lip Balm" },
+        tipo: "labios",
+        img: "img/labios.jpg",
+        ingredientes: {
+          es: ["Manteca de cacao", "Aceite de oliva", "Miel"],
+          en: ["Cocoa butter", "Olive oil", "Honey"]
+        },
+        preparacion: {
+          es: ["Derrite la manteca y mézclala con miel y aceite.", "Deja enfriar y usa como bálsamo."],
+          en: ["Melt the butter and mix it with honey and oil.", "Let cool and use as a balm."]
+        },
+        consejos: {
+          es: ["Úsalo en las noches para labios suaves."],
+          en: ["Use at night for soft lips."]
+        },
+        advertencia: {
+          es: "⚠️ Asegúrate de no ser alérgico a ninguno de los ingredientes antes de usarlo.",
+          en: "⚠️ Make sure you are not allergic to any of the ingredients before using."
+        },
+        color: "#f8d1e0"
+      },
+      cabello: {
+        id: "cabello",
+        titulo: { es: "🦰 Mascarilla Capilar Natural", en: "🦰 Natural Hair Mask" },
+        tipo: "cabello",
+        img: "img/cabello.jpg",
+        ingredientes: {
+          es: ["Gel de sábila", "Aceite de ricino", "Romero"],
+          en: ["Aloe gel", "Castor oil", "Rosemary"]
+        },
+        preparacion: {
+          es: ["Licúa 4 cdas de sábila con 2 de aceite.", "Agrega infusión de romero."],
+          en: ["Blend 4 tbsp of aloe with 2 of oil.", "Add rosemary infusion."]
+        },
+        consejos: {
+          es: ["Aplica en cuero cabelludo limpio.", "Deja actuar 30 min y enjuaga."],
+          en: ["Apply on clean scalp.", "Leave for 30 min and rinse."]
+        },
+        advertencia: {
+          es: "⚠️ Evita el contacto con los ojos. Si tu cuero cabelludo es muy sensible, reduce la cantidad de romero.",
+          en: "⚠️ Avoid contact with eyes. If your scalp is very sensitive, reduce the amount of rosemary."
+        },
+        color: "#d9f0c7"
+      },
+      arcilla: {
+        id: "arcilla",
+        titulo: { es: "🍃 Mascarilla de Arcilla Verde", en: "🍃 Green Clay Mask" },
+        tipo: "grasa",
+        img: "img/arcilla.jpg",
+        ingredientes: {
+          es: ["Arcilla verde en polvo", "Agua destilada o de rosas"],
+          en: ["Green clay powder", "Distilled or rose water"]
+        },
+        preparacion: {
+          es: ["Mezcla una cucharada de arcilla con agua hasta formar una pasta.", "Aplica en el rostro evitando el contorno de ojos y labios."],
+          en: ["Mix a tablespoon of clay with water to form a paste.", "Apply to the face avoiding the eye and lip contour."]
+        },
+        consejos: {
+          es: ["Deja secar por 10-15 minutos y enjuaga con agua tibia.", "Usar una vez por semana para piel grasa."],
+          en: ["Let it dry for 10-15 minutes and rinse with warm water.", "Use once a week for oily skin."]
+        },
+        advertencia: {
+          es: "⚠️ Puede resecar en exceso pieles secas o sensibles. Si sientes tirantez o ardor, enjuaga inmediatamente.",
+          en: "⚠️ May overly dry out dry or sensitive skin. If you feel tightness or stinging, rinse immediately."
+        },
+        color: "#b0cf8d"
+      },
+      aguacate: {
+        id: "aguacate",
+        titulo: { es: "🥑 Mascarilla de Aguacate y Miel", en: "🥑 Avocado and Honey Mask" },
+        tipo: "seca",
+        img: "img/aguacate.jpg",
+        ingredientes: {
+          es: ["1/2 aguacate maduro", "1 cucharada de miel", "1 cucharadita de aceite de oliva"],
+          en: ["1/2 ripe avocado", "1 tablespoon of honey", "1 teaspoon of olive oil"]
+        },
+        preparacion: {
+          es: ["Tritura el aguacate hasta obtener un puré.", "Mezcla con la miel y el aceite hasta que quede suave."],
+          en: ["Mash the avocado into a puree.", "Mix with honey and oil until smooth."]
+        },
+        consejos: {
+          es: ["Aplica sobre el rostro limpio y deja actuar por 20 minutos.", "Ideal para nutrir e hidratar la piel seca."],
+          en: ["Apply to clean face and leave on for 20 minutes.", "Ideal for nourishing and hydrating dry skin."]
+        },
+        advertencia: {
+          es: "⚠️ El aceite de oliva puede no ser adecuado para pieles con tendencia a acné. Realiza una prueba en una zona pequeña.",
+          en: "⚠️ Olive oil may not be suitable for acne-prone skin. Perform a patch test."
+        },
+        color: "#d9ffc6"
+      },
+      tonico: {
+        id: "tonico",
+        titulo: { es: "🌹 Tónico de Manzanilla y Rosas", en: "🌹 Chamomile and Rose Toner" },
+        tipo: "sensible",
+        img: "img/tonico.jpg",
+        ingredientes: {
+          es: ["Infusión de manzanilla", "Agua de rosas"],
+          en: ["Chamomile infusion", "Rose water"]
+        },
+        preparacion: {
+          es: ["Enfría una taza de infusión de manzanilla.", "Mezcla la infusión con media taza de agua de rosas en una botella con spray."],
+          en: ["Cool a cup of chamomile infusion.", "Mix the infusion with half a cup of rose water in a spray bottle."]
+        },
+        consejos: {
+          es: ["Usar después de la limpieza para calmar y tonificar la piel.", "Guardar en el refrigerador para prolongar su vida útil."],
+          en: ["Use after cleansing to soothe and tone the skin.", "Store in the refrigerator to prolong its shelf life."]
+        },
+        advertencia: {
+          es: "⚠️ Si la piel se irrita, suspende el uso. Usar solo manzanilla si se es sensible a las rosas.",
+          en: "⚠️ If skin irritation occurs, discontinue use. Use chamomile only if you are sensitive to roses."
+        },
+        color: "#e6e1f0"
+      }
+    };
+    const textos = {
+      es: {
+        bienvenida: "Bienvenido a Recetas Naturales STP",
+        sub: "💚 Elige tu tipo de piel y descubre recetas caseras perfectas para ti 💚",
+        principal: "🌿 Belleza Casera 🌸",
+        guardar: "Receta guardada localmente.",
+        favoritoA: "Agregada a favoritos.",
+        favoritoQ: "Quitada de favoritos.",
+        recetaPDF: "Descargando PDF...",
+        compartir: "Enlace copiado o compartido",
+        testimonio: "¡Gracias por tu testimonio!",
+        recetaPers: "Receta personalizada guardada.",
+        idioma: "Idioma cambiado.",
+        modoOscuro: "Modo oscuro activado",
+        modoClaro: "Modo claro activado",
+        filtro: "Filtrado por",
+        buscar: "Buscar receta...",
+        añadir: "➕ Añadir receta",
+        testimonioBtn: "💬 Testimonio",
+        testimonios: "💬 Testimonios",
+        cerrar: "Cerrar ventana",
+        guardarBtn: "Guardar",
+        ingredientes: "Ingredientes",
+        preparacion: "Preparación",
+        consejos: "Consejos de aplicación",
+        advertencia: "Advertencia"
+      },
+      en: {
+        bienvenida: "Welcome to Natural Recipes STP",
+        sub: "💚 Choose your skin type and discover homemade recipes for you 💚",
+        principal: "🌿 Homemade Beauty 🌸",
+        guardar: "Recipe saved locally.",
+        favoritoA: "Added to favorites.",
+        favoritoQ: "Removed from favorites.",
+        recetaPDF: "Downloading PDF...",
+        compartir: "Link copied or shared",
+        testimonio: "Thanks for your review!",
+        recetaPers: "Custom recipe saved.",
+        idioma: "Language changed.",
+        modoOscuro: "Dark mode on",
+        modoClaro: "Light mode on",
+        filtro: "Filtered by",
+        buscar: "Search recipe...",
+        añadir: "➕ Add recipe",
+        testimonioBtn: "💬 Testimony",
+        testimonios: "💬 Reviews",
+        cerrar: "Close window",
+        guardarBtn: "Save",
+        ingredientes: "Ingredients",
+        preparacion: "Preparation",
+        consejos: "Tips",
+        advertencia: "Warning"
+      }
+    };
+    const estado = {
+      idioma: localStorage.getItem("idioma") || "es",
+      modoOscuro: JSON.parse(localStorage.getItem("modoOscuro") || "false"),
+      favoritos: JSON.parse(localStorage.getItem("favoritos") || "[]"),
+      recetasPersonalizadas: JSON.parse(localStorage.getItem("recetasPersonalizadas") || "[]"),
+      testimonios: JSON.parse(localStorage.getItem("testimonios") || "[]"),
+      recetaActual: "",
+      recetas: {}
+    };
+    const dom = {
+      portada: document.getElementById("portada"),
+      barraSuperior: document.getElementById("barraSuperior"),
+      controlesSuperiores: document.getElementById("controlesSuperiores"),
+      botonesRecetas: document.getElementById("botonesRecetas"),
+      contenedorRecetaActiva: document.getElementById("contenedorRecetaActiva"),
+      accionesReceta: document.getElementById("accionesReceta"),
+      notaMedidas: document.getElementById("notaMedidas"),
+      pieLegal: document.getElementById("pieLegal"),
+      testimonios: document.getElementById("testimonios"),
+      modalPersonalizada: document.getElementById("modalPersonalizada"),
+      modalTestimonio: document.getElementById("modalTestimonio"),
+      toast: document.getElementById("toast"),
+      musicaFondo: document.getElementById("musicaFondo"),
+      filtroPiel: document.getElementById("filtroPiel"),
+      busquedaReceta: document.getElementById("busquedaReceta"),
+      favoritoBtn: document.getElementById("favoritoBtn"),
+      musicaBtn: document.getElementById("musicaBtn"),
+    };
+    document.addEventListener("DOMContentLoaded", () => {
+      estado.recetas = { ...recetasBase, ...estado.recetasPersonalizadas.reduce((acc, r) => ({ ...acc, [r.id]: r }), {}) };
+      if (estado.modoOscuro) document.body.classList.add("modo-oscuro");
+      setIdiomaTextos();
+      renderBotonesRecetas();
+      renderTestimonios();
+      document.getElementById("entrarBtn").addEventListener('click', iniciarApp);
+      dom.filtroPiel.addEventListener('change', filtrarRecetas);
+      dom.busquedaReceta.addEventListener('input', filtrarRecetas);
+      document.getElementById("modoBtn").addEventListener('click', alternarModo);
+      document.getElementById("añadirRecetaBtn").addEventListener('click', abrirModalPersonalizada);
+      document.getElementById("añadirTestimonioBtn").addEventListener('click', abrirModalTestimonio);
+      document.getElementById("favoritoBtn").addEventListener('click', toggleFavorito);
+      document.getElementById("musicaBtn").addEventListener('click', alternarMusica);
+      document.getElementById("idiomaBtn").addEventListener('click', cambiarIdioma);
+      document.getElementById("descargarTxtBtn").addEventListener('click', descargarReceta);
+      document.getElementById("descargarPdfBtn").addEventListener('click', descargarRecetaPDF);
+      document.getElementById("compartirBtn").addEventListener('click', compartirReceta);
+      document.getElementById("guardarPersonalizadaBtn").addEventListener('click', guardarPersonalizada);
+      document.getElementById("guardarTestimonioBtn").addEventListener('click', guardarTestimonio);
+      document.querySelectorAll('.modal-cerrar').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const modal = btn.closest('.modal');
+          if (modal) modal.classList.add('oculto');
+        });
+      });
+    });
+    function setIdiomaTextos() {
+      const currentTextos = textos[estado.idioma];
+      document.getElementById("bienvenidaTitulo").textContent = currentTextos.bienvenida;
+      document.getElementById("bienvenidaSub").textContent = currentTextos.sub;
+      document.getElementById("tituloPrincipal").textContent = currentTextos.principal;
+      dom.busquedaReceta.placeholder = currentTextos.buscar;
+      document.querySelectorAll('[id^="añadirRecetaBtn"]').forEach(b => b.innerText = currentTextos.añadir);
+      document.querySelectorAll('[id^="añadirTestimonioBtn"]').forEach(b => b.innerText = currentTextos.testimonioBtn);
+      if (dom.modalTestimonio) dom.modalTestimonio.querySelector("h2").innerText = currentTextos.testimonios;
+      if (dom.modalPersonalizada) dom.modalPersonalizada.querySelector("h2").innerText = currentTextos.añadir;
+      document.querySelectorAll('.modal-cerrar').forEach(b => b.setAttribute("aria-label", currentTextos.cerrar));
+      document.querySelectorAll('[id^="guardar"]').forEach(b => b.innerText = currentTextos.guardarBtn);
+      if (dom.testimonios) dom.testimonios.querySelector("h2").innerText = currentTextos.testimonios;
+    }
+    function renderBotonesRecetas() {
+      dom.botonesRecetas.innerHTML = "";
+      Object.values(estado.recetas).forEach(receta => {
+        const btn = document.createElement("button");
+        btn.innerText = receta.titulo[estado.idioma] || receta.titulo["es"];
+        btn.setAttribute("tabindex", "0");
+        btn.setAttribute("aria-label", btn.innerText);
+        btn.onclick = () => mostrarReceta(receta.id);
+        if (estado.favoritos.includes(receta.id)) btn.dataset.favorito = "true";
+        dom.botonesRecetas.appendChild(btn);
+      });
+      filtrarRecetas();
+    }
+    function renderRecetaActiva() {
+      if (!estado.recetaActual) estado.recetaActual = Object.keys(estado.recetas)[0];
+      const receta = estado.recetas[estado.recetaActual];
+      if (!receta) {
+        dom.contenedorRecetaActiva.innerHTML = "<p>Receta no encontrada.</p>";
+        return;
+      }
+      const advertenciaHtml = receta.advertencia ? `
+        <div class="advertencia">
+          <h3>⚠️ ${textos[estado.idioma].advertencia}</h3>
+          <p>${receta.advertencia[estado.idioma]}</p>
+        </div>` : "";
+      dom.contenedorRecetaActiva.innerHTML = `
+        <section class="receta mostrar animada" id="${receta.id}" data-piel="${receta.tipo}" role="region" aria-label="${receta.titulo[estado.idioma] || receta.titulo['es']}">
+        <div class="contenido-receta" style="background-color:${receta.color}">
+          <img src="img/${receta.img.split('/').pop()}" alt="${receta.titulo[estado.idioma] || receta.titulo["es"]}" class="img-receta" loading="lazy">
+          <h2>${receta.titulo[estado.idioma] || receta.titulo["es"]}</h2>
+          <h3>🌿 ${textos[estado.idioma].ingredientes}:</h3>
+          <ul>${receta.ingredientes[estado.idioma].map(i => `<li>✅ ${i}</li>`).join("")}</ul>
+          <h3>🛠️ ${textos[estado.idioma].preparacion}:</h3>
+          <ol>${receta.preparacion[estado.idioma].map(p => `<li>${p}</li>`).join("")}</ol>
+          <h3>📌 ${textos[estado.idioma].consejos}:</h3>
+          <ul>${receta.consejos[estado.idioma].map(c => `<li>💡 ${c}</li>`).join("")}</ul>
+          ${advertenciaHtml}
+        </div>
+        </section>
+      `;
+      setFavoritoBtn();
+    }
+    function filtrarRecetas() {
+      const tipo = dom.filtroPiel.value;
+      const q = dom.busquedaReceta.value.trim().toLowerCase();
+      Object.values(estado.recetas).forEach(receta => {
+        let visible = (tipo === "todas" || receta.tipo === tipo);
+        if (q) {
+          const txt = (receta.titulo[estado.idioma] + " " + (receta.ingredientes[estado.idioma] || []).join(" ")).toLowerCase();
+          visible = visible && txt.includes(q);
+        }
+        const btn = Array.from(dom.botonesRecetas.children).find(b => b.innerText === (receta.titulo[estado.idioma] || receta.titulo["es"]));
+        if (btn) btn.style.display = visible ? "" : "none";
+      });
+    }
+    function iniciarApp() {
+      dom.portada.classList.add("oculto");
+      dom.barraSuperior.classList.remove("oculto");
+      dom.botonesRecetas.classList.remove("oculto");
+      dom.contenedorRecetaActiva.classList.remove("oculto");
+      dom.controlesSuperiores.classList.remove("oculto");
+      dom.notaMedidas.classList.remove("oculto");
+      dom.pieLegal.classList.remove("oculto");
+      dom.accionesReceta.classList.remove("oculto");
+      dom.testimonios.classList.remove("oculto");
+      mostrarBienvenida();
+      mostrarReceta(Object.keys(estado.recetas)[0]);
+    }
+    function mostrarReceta(id) {
+      estado.recetaActual = id;
+      renderRecetaActiva();
+      window.scrollTo({ top: 150, behavior: "smooth" });
+    }
+    function setFavoritoBtn() {
+      const esFav = estado.favoritos.includes(estado.recetaActual);
+      dom.favoritoBtn.dataset.favorito = esFav ? "true" : "false";
+      dom.favoritoBtn.innerText = esFav ? "★ Favorito" : "🤍 Favorito";
+    }
+    function toggleFavorito() {
+      const idx = estado.favoritos.indexOf(estado.recetaActual);
+      if (idx === -1) {
+        estado.favoritos.push(estado.recetaActual);
+        showToast(textos[estado.idioma].favoritoA);
+      } else {
+        estado.favoritos.splice(idx, 1);
+        showToast(textos[estado.idioma].favoritoQ);
+      }
+      localStorage.setItem("favoritos", JSON.stringify(estado.favoritos));
+      setFavoritoBtn();
+      renderBotonesRecetas();
+    }
+    function abrirModalPersonalizada() {
+      dom.modalPersonalizada.classList.remove("oculto");
+    }
+    function cerrarModalPersonalizada() {
+      dom.modalPersonalizada.classList.add("oculto");
+    }
+    function guardarPersonalizada() {
+      const id = "pers_" + Date.now();
+      const titulo = document.getElementById("nuevaTitulo").value.trim();
+      const tipo = document.getElementById("nuevaTipo").value.trim().toLowerCase();
+      const img = document.getElementById("nuevaImg").value.trim() || "img/personalizada.jpg";
+      const ingredientes = document.getElementById("nuevaIngredientes").value.split(",").map(x => x.trim());
+      const preparacion = document.getElementById("nuevaPreparacion").value.split(";").map(x => x.trim());
+      const consejos = document.getElementById("nuevaConsejos").value.split(";").map(x => x.trim());
+      if (!titulo || !tipo || ingredientes.length < 1 || preparacion.length < 1) {
+        showToast("Completa toda la información.");
+        return;
+      }
+      const nueva = {
+        id,
+        titulo: { [estado.idioma]: titulo },
+        tipo,
+        img,
+        ingredientes: { [estado.idioma]: ingredientes },
+        preparacion: { [estado.idioma]: preparacion },
+        consejos: { [estado.idioma]: consejos.filter(c => c) },
+        color: "#e4ffd4",
+      };
+      estado.recetas[id] = nueva;
+      estado.recetasPersonalizadas.push(nueva);
+      localStorage.setItem("recetasPersonalizadas", JSON.stringify(estado.recetasPersonalizadas));
+      cerrarModalPersonalizada();
+      renderBotonesRecetas();
+      mostrarReceta(id);
+      showToast(textos[estado.idioma].recetaPers);
+    }
+    function compartirReceta() {
+      const receta = estado.recetas[estado.recetaActual];
+      let text = `${receta.titulo[estado.idioma] || receta.titulo["es"]}\n\n`;
+      text += `${textos[estado.idioma].ingredientes}: ${receta.ingredientes[estado.idioma].join(", ")}\n`;
+      text += `${textos[estado.idioma].preparacion}: ${receta.preparacion[estado.idioma].join(". ")}\n`;
+      text += `${textos[estado.idioma].consejos}: ${receta.consejos[estado.idioma].join(". ")}\n`;
+      if (receta.advertencia) {
+        text += `\n${textos[estado.idioma].advertencia}: ${receta.advertencia[estado.idioma]}\n`;
+      }
+      if (navigator.share) {
+        navigator.share({ title: receta.titulo[estado.idioma], text, url: window.location.href });
+        showToast(textos[estado.idioma].compartir);
+      } else {
+        navigator.clipboard.writeText(text + "\n" + window.location.href);
+        showToast(textos[estado.idioma].compartir);
+      }
+    }
+    function descargarReceta() {
+      const receta = estado.recetas[estado.recetaActual];
+      let text = `${receta.titulo[estado.idioma] || receta.titulo["es"]}\n\n`;
+      text += `${textos[estado.idioma].ingredientes}: ${receta.ingredientes[estado.idioma].join(", ")}\n`;
+      text += `${textos[estado.idioma].preparacion}: ${receta.preparacion[estado.idioma].join(". ")}\n`;
+      text += `${textos[estado.idioma].consejos}: ${receta.consejos[estado.idioma].join(". ")}\n`;
+      if (receta.advertencia) {
+        text += `\n${textos[estado.idioma].advertencia}: ${receta.advertencia[estado.idioma]}\n`;
+      }
+      const blob = new Blob([text], { type: "text/plain" });
+      const enlace = document.createElement("a");
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = `${estado.recetaActual}-receta.txt`;
+      enlace.click();
+    }
+    function descargarRecetaPDF() {
+      showToast(textos[estado.idioma].recetaPDF);
+      const receta = estado.recetas[estado.recetaActual];
+      const { jspdf } = window.jspdf;
+      const doc = new jspdf();
+      let y = 18;
+      doc.setFontSize(24);
+      doc.text(receta.titulo[estado.idioma] || receta.titulo["es"], 10, y);
+      y += 10;
+      doc.setFontSize(14);
+      doc.text((textos[estado.idioma].ingredientes + ": " + receta.ingredientes[estado.idioma].join(", ")), 10, y);
+      y += 10;
+      doc.text((textos[estado.idioma].preparacion + ": " + receta.preparacion[estado.idioma].join(". ")), 10, y);
+      y += 10;
+      doc.text((textos[estado.idioma].consejos + ": " + receta.consejos[estado.idioma].join(". ")), 10, y);
+      if (receta.advertencia) {
+        y += 10;
+        doc.text((textos[estado.idioma].advertencia + ": " + receta.advertencia[estado.idioma]), 10, y);
+      }
+      doc.save(`${estado.recetaActual}-receta.pdf`);
+    }
+    function guardar() { showToast(textos[estado.idioma].guardar); }
+    function imprimirReceta() { window.print(); }
+    function mostrarBienvenida() { showToast("🌿 " + (estado.idioma === "es" ? "¡Bienvenido/a a tu recetario natural!" : "Welcome to your natural recipes!"), 2200); }
+    function showToast(msg, ms = 1800) {
+      dom.toast.innerText = msg;
+      dom.toast.classList.add("mostrar");
+      setTimeout(() => dom.toast.classList.remove("mostrar"), ms);
+    }
+    function alternarMusica() {
+      if (dom.musicaFondo.paused) {
+        dom.musicaFondo.volume = 0.2;
+        dom.musicaFondo.play();
+        dom.musicaBtn.innerText = "🔊";
+        showToast("🎵 Música activada");
+      } else {
+        dom.musicaFondo.pause();
+        dom.musicaBtn.innerText = "🎵";
+        showToast("🔇 Música pausada");
+      }
+    }
+    function alternarModo() {
+      estado.modoOscuro = !estado.modoOscuro;
+      document.body.classList.toggle("modo-oscuro", estado.modoOscuro);
+      localStorage.setItem("modoOscuro", estado.modoOscuro);
+      showToast(textos[estado.idioma][estado.modoOscuro ? "modoOscuro" : "modoClaro"]);
+    }
+    function cambiarIdioma() {
+      estado.idioma = estado.idioma === "es" ? "en" : "es";
+      localStorage.setItem("idioma", estado.idioma);
+      setIdiomaTextos();
+      renderBotonesRecetas();
+      renderRecetaActiva();
+      filtrarRecetas();
+      showToast(textos[estado.idioma].idioma);
+    }
+    function abrirModalTestimonio() {
+      dom.modalTestimonio.classList.remove("oculto");
+    }
+    function cerrarModalTestimonio() {
+      dom.modalTestimonio.classList.add("oculto");
+    }
+    function guardarTestimonio() {
+      const nombre = document.getElementById("nombreTestimonio").value.trim() || "Anónimo";
+      const texto = document.getElementById("textoTestimonio").value.trim();
+      if (!texto) {
+        showToast("Escribe tu experiencia.");
+        return;
+      }
+      estado.testimonios.unshift({ nombre, texto, fecha: new Date().toLocaleDateString() });
+      localStorage.setItem("testimonios", JSON.stringify(estado.testimonios));
+      cerrarModalTestimonio();
+      renderTestimonios();
+      showToast(textos[estado.idioma].testimonio);
+    }
+    function renderTestimonios() {
+      const ul = document.getElementById("listaTestimonios");
+      if (!ul) return;
+      ul.innerHTML = "";
+      estado.testimonios.slice(0, 10).forEach(t => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${t.nombre}</strong> <em>(${t.fecha})</em>:<br>${t.texto}`;
+        ul.appendChild(li);
+      });
+    }
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        cerrarModalPersonalizada();
+        cerrarModalTestimonio();
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        const btn = document.activeElement;
+        if (btn && btn.tagName === "BUTTON") btn.click();
+      }
+    });
+  </script>
+</body>
+</html>
